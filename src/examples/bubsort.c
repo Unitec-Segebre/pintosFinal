@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 /* Size of array to sort. */
-#define SORT_SIZE 128
+#define SORT_SIZE 16800
 
 int
 main (void)

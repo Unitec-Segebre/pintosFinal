@@ -182,3 +182,9 @@ inumber (int fd)
 {
   return syscall1 (SYS_INUMBER, fd);
 }
+
+int
+getthreadinfo (int tid, struct threadToPrint* threadinfo) 
+{
+  return syscall2 (SYS_GETTHREADINFO, tid, threadinfo);
+}

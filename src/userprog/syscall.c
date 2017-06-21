@@ -51,6 +51,17 @@ void sys_close(int fd);
 int sys_read(int fd, void *buffer, unsigned size);
 int sys_write(int fd, const void *buffer, unsigned size);
 
+struct threadToPrint
+{
+  int tid;
+  int priority;
+  int run_count;
+  int wait_count;
+  int isPrint;
+};
+int getthreadinfo(int pid, struct threadToPrint* threadinfo);
+void printThreadInfo(struct thread *t, void* aux);
+
 #ifdef VM
 mmapid_t sys_mmap(int fd, void *);
 bool sys_munmap(mmapid_t);
@@ -68,6 +79,10 @@ bool sys_readdir(int fd, char *filename);
 bool sys_isdir(int fd);
 int sys_inumber(int fd);
 #endif
+
+// #ifdef PROJECTSISO
+int sys_getthreadinfo(int tid, struct threadToPrint* threadinfo);
+// #endif
 
 struct lock filesys_lock;
 
@@ -336,6 +351,20 @@ syscall_handler (struct intr_frame *f)
     }
 
 #endif
+// #ifdef PROJECTSISO
+  case SYS_GETTHREADINFO: // 20
+    {
+      int tid;
+      struct threadToPrint* threadinfo;
+      int return_code;
+
+      memread_user(f->esp + 4, &tid, sizeof(tid));
+      memread_user(f->esp + 8, &threadinfo, sizeof(threadinfo));
+      return_code = sys_getthreadinfo(tid, threadinfo);
+      f->eax = return_code;
+      break;
+    }
+// #endif
 
 
   /* unhandled case */
@@ -916,3 +945,39 @@ int sys_inumber(int fd)
 }
 
 #endif
+
+
+// #ifdef PROJECTSISO
+
+int sys_getthreadinfo(int tid, struct threadToPrint* threadinfo)
+{
+  threadinfo->tid = tid;
+  enum intr_level oldlevel = intr_disable ();
+  thread_foreach(printThreadInfo, (void*)&threadinfo);
+  intr_set_level (oldlevel);
+  int temp = threadinfo->tid;
+  threadinfo->tid = tid;
+  return (temp==-1)?1:0;
+}
+
+void printThreadInfo(struct thread *t, void* aux)
+{
+  struct threadToPrint* info = *((struct threadToPrint**)aux);
+  if(t->tid == info->tid){
+    info->priority = t->priority;
+    info->run_count = t->run_count;
+    info->wait_count = t->wait_count;
+    info->isPrint = t->isPrint;
+    t->isPrint = 0;
+
+    /*printf("ID: %d\n", t->tid);
+    printf("Priority: %d\n", t->priority);
+    printf("Run Count: %d\n", t->run_count);
+    printf("Wait Count: %d\n", t->wait_count);*/
+  }else if(t->tid == get_last_thread_tid()){
+    info->tid = -1;
+  }
+
+}
+
+// #endif

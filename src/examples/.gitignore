@@ -19,3 +19,6 @@ recursor
 *.d
 *.o
 *.a
+
+run-programs
+run-hi

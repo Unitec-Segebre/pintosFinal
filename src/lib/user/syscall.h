@@ -4,6 +4,16 @@
 #include <stdbool.h>
 #include <debug.h>
 
+/* Projecto de SISO */
+struct threadToPrint
+{
+  int tid;
+  int priority;
+  int run_count;
+  int wait_count;
+  int isPrint;
+};
+
 /* Process identifier. */
 typedef int pid_t;
 #define PID_ERROR ((pid_t) -1)
@@ -44,5 +54,8 @@ bool mkdir (const char *dir);
 bool readdir (int fd, char name[READDIR_MAX_LEN + 1]);
 bool isdir (int fd);
 int inumber (int fd);
+
+/* Project SISO */
+int getthreadinfo(int tid, struct threadToPrint* threadinfo);
 
 #endif /* lib/user/syscall.h */
